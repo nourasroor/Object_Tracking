@@ -1,4 +1,3 @@
-from turtle import speed
 
 import numpy as np
 import cv2
