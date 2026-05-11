@@ -2,4 +2,4 @@ numpy
 streamlit
 opencv-python-headless
 matplotlib
-pillow
+time
