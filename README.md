@@ -1,81 +1,86 @@
-# Object Detection App
+# Object Tracking APP
 
-A simple Streamlit application for objects tracking using OpenCV background subtraction.
+## Project Overview
 
-## Overview
+This repository contains a Streamlit-based object tracking application that uses OpenCV for motion detection and visualization. The app accepts `.mp4` and `.avi` video uploads, processes each frame using background subtraction, identifies moving objects with contour detection, and renders both the processed output and the foreground mask.
 
-This project lets users upload a video file and view:
+The current implementation is designed for proof-of-concept object motion tracking, including applications such as workplace monitoring, simple surveillance, or video analytics demonstrations.
 
-- the original uploaded video
-- a processed video with detected objects highlighted
-- the foreground mask used for object detection
+## Key Features
 
-The app uses OpenCV's `BackgroundSubtractorMOG2` to detect moving objects and draw bounding boxes around them.
+- Upload video files directly through a Streamlit interface
+- Process video frames using OpenCV's MOG2 background subtraction algorithm
+- Detect motion by extracting foreground contours from the background mask
+- Draw bounding boxes around moving objects in the video
+- Display both the original processed frame and the foreground mask side by side
+- Customize bounding box color using a color picker
+- Control processing speed with an adjustable slider
 
-## Features
+## File Structure
 
-- Video upload support (`.mp4`, `.avi`)
-- Real-time frame processing using OpenCV
-- Display of both processed video frames and foreground mask
-- Simple web interface powered by Streamlit
+- `app.py`: Main Streamlit application with UI controls and OpenCV video processing logic.
+- `requirements.txt`: Project dependency list for Python package installation.
+- `README.md`: Project documentation and usage instructions.
 
-## Requirements
+## Detailed Architecture
 
-- Python 3.7+
-- `streamlit`
-- `opencv-python`
-- `numpy`
+### User Interface
 
-These requirements are already listed in `requirements.txt`.
+The Streamlit UI is built with a main page and a sidebar.
+- Main page: title, app description, and the video upload widget.
+- Sidebar: controls for bounding box color and frame processing speed.
 
-## Setup
+### Video Processing Pipeline
 
-1. Create a virtual environment (recommended):
+1. The user uploads a video file via `st.file_uploader`.
+2. Uploaded bytes are written to a temporary file to make the video accessible to OpenCV.
+3. `cv2.VideoCapture` opens the temporary file and learns the total frame count.
+4. `cv2.createBackgroundSubtractorMOG2()` creates a background subtraction model.
+5. Each frame is read from the video and passed to the background subtractor.
+6. The resulting foreground mask is analyzed using `cv2.findContours()`.
+7. Contours with area above a threshold are drawn as bounding boxes on the video frame.
+8. The processed frame and the grayscale foreground mask are displayed in real time.
 
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
+### Detection Logic
 
-2. Install dependencies:
-
-   ```powershell
-   pip install -r requirements.txt
-   ```
-
-## Run the app
-
-From the project directory, run:
-
-```powershell
-streamlit run app.py
-```
-
-Then open the local Streamlit URL shown in the terminal.
+- Background subtractor: OpenCV MOG2 algorithm with default parameters.
+- Contour retrieval: `cv2.RETR_EXTERNAL` extracts external contours only.
+- Contour approximation: `cv2.CHAIN_APPROX_SIMPLE` reduces contour points for efficiency.
+- Bounding box filter: only contours with area greater than `500` pixels are visualized.
+- Color conversion: selected hex color is converted to BGR integers for OpenCV drawing.
 
 ## Usage
 
-1. Open the Streamlit app in your browser.
-2. Upload a video file in `.mp4` or `.avi` format.
-3. The app displays the original video, the detected objects video, and the foreground mask.
+1. Install dependencies:
 
-## Notes
+```bash
+pip install -r requirements.txt
+```
 
-- The current detection method uses background subtraction and contour filtering.
-- Very small contours are ignored using an area threshold of `500`.
-- This app is best for videos with a relatively static background and moving objects.
+2. Run the Streamlit app:
 
-## Improvements
+```bash
+streamlit run app.py
+```
 
-Potential enhancements include:
+3. Open the provided local URL in your browser.
+4. Upload a video file (`.mp4` or `.avi`).
+5. Adjust the bounding box color and processing speed.
+6. Watch the app display the tracked motion and corresponding foreground mask.
 
-- adding object classification or tracking IDs
-- improving detection with deep learning models
-- adding controls for threshold and detection sensitivity
-- supporting more video formats
+## Notes and Limitations
 
-## Files
+- The app performs frame-by-frame motion detection and does not maintain unique object IDs between frames.
+- It is best suited for videos with moderate camera movement; heavy camera shake may produce noisy masks.
+- Performance depends on video size, frame rate, and selected slider speed.
+- The current `requirements.txt` contains Python package names; if installation issues occur, use `opencv-python` instead of `opencv-python-headless`.
 
-- `app.py` � main Streamlit application
-- `requirements.txt` � Python dependencies
-- `README.md` � project documentation
+## Future Improvements
+
+- Add a minimum area slider to fine-tune contour filtering.
+- Add a toggle to display or hide the foreground mask.
+- Implement object tracking with identity assignment across frames.
+- Support additional video file formats and batch processing.
+- Add logging and download options for processed video output.
+
+
